@@ -23,7 +23,7 @@ body {
   color: white;
   text-align: center;
   padding: 40px 20px;
-  overflow: hidden; /* Hide overflow for wave effect */
+  overflow: hidden;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -39,8 +39,8 @@ body {
   height: 100%;
   top: 0;
   left: 0;
-  z-index: -2; /* Di bawah gelombang */
-  background-color: transparent; /* Pastikan transparan agar gelombang terlihat */
+  z-index: -2;
+  background-color: transparent;
 }
 
 /* Wavy Background Effect */
@@ -82,7 +82,7 @@ body {
   border: 1px solid var(--card-border);
   animation: fadeIn 0.8s ease-out forwards;
   position: relative;
-  z-index: 1; /* Pastikan kotak berada di atas gelombang dan partikel */
+  z-index: 1;
 }
 
 .glass-box.admin-panel {
@@ -321,7 +321,7 @@ button:disabled {
   width: 180px;
   text-align: center;
   position: relative;
-  overflow: hidden; /* For hover effect */
+  overflow: hidden;
 }
 
 .bug-card i {
@@ -389,6 +389,7 @@ button:disabled {
 
 .popup-notification.success { border-left: 6px solid var(--secondary-color); }
 .popup-notification.error { border-left: 6px solid var(--red); }
+.popup-notification.warning { border-left: 6px solid orange; }
 .popup-notification i { margin-right: 12px; }
 
 /* Utilities */
@@ -399,7 +400,6 @@ button:disabled {
 .text-success { color: var(--secondary-color); }
 .text-danger { color: var(--red); }
 .text-warning { color: orange; }
-
 
 hr {
   border: 1px solid var(--card-border);

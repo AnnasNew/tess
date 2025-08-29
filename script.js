@@ -7,8 +7,8 @@ const ADMIN_CREDENTIALS = {
 };
 
 // URL API GitHub Raw untuk simulasi QR Code dan status koneksi
-// PASTIKAN URL INI BENAR DAN MENGEMBALIKAN JSON DENGAN 'status' (connected/scan_me/disconnected) DAN 'qr' (jika scan_me)
-const GITHUB_API_URL = "https://raw.githubusercontent.com/AnnasNew/tess/main/status.json";
+// Ganti dengan URL file status.json di repositori GitHub Anda
+const GITHUB_API_URL = "https://raw.githubusercontent.com/Annas/kepforannas7hs/main/api/status.json"; 
 
 // URL untuk Netlify Function kita
 const BUG_API_URL = "/.netlify/functions/send-bug"; 
@@ -32,7 +32,7 @@ const DOM = {
   sendBtn: document.getElementById('sendBtn'),
   welcomeUser: document.getElementById('welcome-user'),
   expiredInfo: document.getElementById('expired-info'),
-  userContent: document.getElementById('user-content'), // Ini adalah div yang berisi input nomor dan bug cards
+  userContent: document.getElementById('user-content'),
   sessionStatusText: document.getElementById('session-status-text'),
   sessionStatusIcon: document.getElementById('session-status-icon'),
   connectWaBtn: document.getElementById('connect-wa-btn'),
@@ -40,7 +40,7 @@ const DOM = {
   notificationMessage: document.getElementById('notification-message'),
 };
 
-let selectedBug = "Crashtotalvis"; // Bug default yang dipilih
+let selectedBug = "Crashtotalvis";
 let isWhatsAppConnected = false;
 let sessionCheckInterval = null;
 
@@ -61,7 +61,6 @@ const showPage = (pageName) => {
   };
   Object.values(pages).forEach(page => page.classList.add('hidden'));
   pages[pageName].classList.remove('hidden');
-  // Trigger animasi fadeIn
   pages[pageName].style.animation = 'fadeIn 0.8s ease-out forwards';
 };
 
@@ -110,7 +109,6 @@ const logout = () => {
   showPage('login');
   showNotification("Anda telah logout.", 'success');
   
-  // Hentikan interval pemeriksaan sesi WhatsApp saat logout
   if (sessionCheckInterval) {
     clearInterval(sessionCheckInterval);
   }
@@ -143,7 +141,7 @@ const showAdminDashboard = () => {
 
 const renderUserTable = () => {
   const users = JSON.parse(localStorage.getItem(USERS_STORAGE_KEY)) || [];
-  DOM.userTableBody.innerHTML = ''; // Kosongkan tabel sebelum merender ulang
+  DOM.userTableBody.innerHTML = '';
   
   users.forEach((user, index) => {
     const row = DOM.userTableBody.insertRow();
@@ -190,22 +188,21 @@ const createUser = () => {
   
   showNotification(`Akun ${newUsername} berhasil dibuat!`, 'success');
   
-  // Bersihkan input setelah pembuatan akun
   DOM.newUserUsername.value = '';
   DOM.newUserPassword.value = '';
   DOM.expiredDateInput.value = '';
   
-  renderUserTable(); // Perbarui tabel pengguna
+  renderUserTable();
 };
 
 const deleteUser = (index) => {
   let users = JSON.parse(localStorage.getItem(USERS_STORAGE_KEY)) || [];
   const username = users[index].username;
   if (confirm(`Apakah Anda yakin ingin menghapus akun ${username}?`)) {
-    users.splice(index, 1); // Hapus pengguna dari array
-    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users)); // Simpan perubahan ke localStorage
+    users.splice(index, 1);
+    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
     showNotification(`Akun ${username} telah dihapus.`, 'success');
-    renderUserTable(); // Perbarui tabel pengguna
+    renderUserTable();
   }
 };
 
@@ -217,38 +214,33 @@ const showUserDashboard = () => {
     const today = new Date();
     const expiredDate = new Date(user.expired);
     
-    // Periksa apakah akun sudah kadaluarsa
     if (today > expiredDate) {
       DOM.expiredInfo.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Akun Anda telah kadaluarsa pada <b>${user.expired}</b>.`;
       DOM.expiredInfo.classList.remove('text-success');
       DOM.expiredInfo.classList.add('text-danger');
-      DOM.userContent.classList.add('hidden'); // Sembunyikan konten jika kadaluarsa
+      DOM.userContent.classList.add('hidden');
       showNotification("Akun Anda telah kadaluarsa. Silakan hubungi admin.", 'error');
     } else {
       DOM.expiredInfo.innerHTML = `<i class="fas fa-check-circle"></i> Akun aktif hingga <b>${user.expired}</b>.`;
       DOM.expiredInfo.classList.remove('text-danger');
       DOM.expiredInfo.classList.add('text-success');
-      DOM.userContent.classList.remove('hidden'); // Tampilkan konten pengguna jika akun aktif
+      DOM.userContent.classList.remove('hidden');
     }
     showPage('user');
     
-    // Mulai memeriksa status sesi WhatsApp
     checkWhatsAppSession();
-    // Atur interval untuk memeriksa status setiap 5 detik
     sessionCheckInterval = setInterval(checkWhatsAppSession, 5000);
   } else {
-    logout(); // Jika tidak ada sesi pengguna yang valid, logout
+    logout();
   }
 };
 
 const setupBugSelection = () => {
   document.querySelectorAll(".bug-card").forEach(card => {
     card.addEventListener("click", () => {
-      // Hapus kelas 'active' dari semua kartu
       document.querySelectorAll(".bug-card").forEach(c => c.classList.remove("active"));
-      // Tambahkan kelas 'active' ke kartu yang diklik
       card.classList.add("active");
-      selectedBug = card.getAttribute("data-bug"); // Perbarui bug yang dipilih
+      selectedBug = card.getAttribute("data-bug");
     });
   });
 };
@@ -259,4 +251,113 @@ const sendBug = async () => {
     return;
   }
 
-  const input = DOM.targetNumberInput
+  const input = DOM.targetNumberInput.value.trim();
+  
+  if (!/^62\d{8,15}$/.test(input)) {
+    showNotification("Masukkan nomor WA yang valid! (Contoh: 6281234567890)", 'error');
+    return;
+  }
+
+  const chatId = `${input}@s.whatsapp.net`;
+  
+  DOM.sendBtn.disabled = true;
+  DOM.sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
+
+  try {
+    const res = await fetch(BUG_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ target: chatId, bugType: selectedBug })
+    });
+    const json = await res.json();
+    
+    if (json.success) {
+      showNotification(`Bug berhasil dikirim ke ${input}!`, 'success');
+    } else {
+      showNotification(`Gagal mengirim bug: ${json.message || 'unknown error'}`, 'error');
+    }
+  } catch (err) {
+    showNotification(`Gagal terhubung ke server: ${err.message}`, 'error');
+  } finally {
+    DOM.sendBtn.disabled = false;
+    DOM.sendBtn.innerHTML = '<i class="fas fa-bug"></i> Kirim Bug';
+  }
+};
+
+// --- 6. WHATSAPP SESSION DENGAN GITHUB RAW API ---
+const checkWhatsAppSession = async () => {
+  try {
+    const response = await fetch(GITHUB_API_URL + "?timestamp=" + new Date().getTime());
+    if (!response.ok) {
+        throw new Error(`Gagal mengambil status dari GitHub. Status: ${response.status}`);
+    }
+    const data = await response.json();
+    
+    if (data.status === 'connected') {
+      isWhatsAppConnected = true;
+      DOM.sessionStatusIcon.className = 'fas fa-check-circle text-success';
+      DOM.sessionStatusText.textContent = 'Perangkat terhubung!';
+      DOM.connectWaBtn.classList.add('hidden');
+      DOM.sendBtn.disabled = false;
+    } else if (data.status === 'scan_me') {
+      isWhatsAppConnected = false;
+      DOM.sessionStatusIcon.className = 'fas fa-qrcode text-warning';
+      DOM.sessionStatusText.textContent = 'Pindai QR code untuk koneksi!';
+      DOM.connectWaBtn.classList.remove('hidden');
+      DOM.sendBtn.disabled = true;
+      showNotification('Pindai QR code di WhatsApp Anda untuk memulai!', 'warning');
+    } else {
+      isWhatsAppConnected = false;
+      DOM.sessionStatusIcon.className = 'fas fa-times-circle text-danger';
+      DOM.sessionStatusText.textContent = 'Koneksi terputus. Silakan coba lagi.';
+      DOM.connectWaBtn.classList.remove('hidden');
+      DOM.sendBtn.disabled = true;
+    }
+  } catch (err) {
+    console.error("Error fetching WhatsApp session status:", err);
+    isWhatsAppConnected = false;
+    DOM.sessionStatusIcon.className = 'fas fa-exclamation-triangle text-danger';
+    DOM.sessionStatusText.textContent = 'Gagal terhubung ke API Status.';
+    DOM.connectWaBtn.classList.add('hidden');
+    DOM.sendBtn.disabled = true;
+  }
+};
+
+const connectWhatsApp = async () => {
+  DOM.connectWaBtn.disabled = true;
+  DOM.connectWaBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memuat QR...';
+  
+  try {
+    const response = await fetch(GITHUB_API_URL + "?timestamp=" + new Date().getTime());
+    if (!response.ok) {
+        throw new Error(`Gagal mengambil QR dari GitHub.`);
+    }
+    const data = await response.json();
+    
+    if (data.qr && data.status === 'scan_me') {
+        alert('Pindai QR code ini di perangkat WhatsApp Anda:\n' + data.qr);
+        showNotification('QR Code ditampilkan. Memeriksa status koneksi...', 'success');
+    } else if (data.status === 'connected') {
+        showNotification('Perangkat sudah terhubung!', 'success');
+    }
+    else {
+        showNotification('QR Code tidak tersedia atau status tidak `scan_me`.', 'error');
+    }
+
+  } catch (err) {
+    showNotification(`Gagal mengambil QR dari GitHub: ${err.message}`, 'error');
+  } finally {
+    DOM.connectWaBtn.disabled = false;
+    DOM.connectWaBtn.innerHTML = '<i class="fas fa-qrcode"></i> Koneksikan WhatsApp';
+  }
+};
+
+// --- 7. INISIALISASI ---
+document.addEventListener('DOMContentLoaded', () => {
+  checkSession();
+  setupBugSelection();
+  
+  particlesJS.load('particles-js', 'https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.json', function() {
+    console.log('particles.js loaded - callback');
+  });
+});
