@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anas Panel | Admin & Pengguna</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    /* Global Variables */
+    :root {
+      --primary-color: #5D3FD3; /* Deep Purple */
+      --secondary-color: #3BCC9B; /* Mint Green */
+      --bg-color: #0c0c1e;
+      --card-bg: rgba(255, 255, 255, 0.08);
+      --card-border: rgba(255, 255, 255, 0.2);
+      --red: #E74C3C; /* Alizarin Red */
+      --font-main: 'Poppins', sans-serif;
+      --font-title: 'Orbitron', sans-serif;
+    }
+
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+      transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--font-main);
+      background-color: var(--bg-color);
+      color: white;
+      text-align: center;
+      padding: 40px 20px;
+      overflow: hidden; /* Hide overflow for wave effect */
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    
+    /* Wavy Background Effect */
+    .wave {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100px;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%231a0d24" fill-opacity="1" d="M0,192L48,176C96,160,192,128,288,149.3C384,171,480,245,576,277.3C672,309,768,299,864,266.7C960,235,1056,181,1152,149.3C1248,117,1344,107,1392,101.3L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+      background-size: cover;
+      animation: waveAnimation 15s linear infinite;
+      opacity: 0.5;
+      z-index: -1;
+    }
+
+    .wave.wave2 {
+      animation: waveAnimation 20s linear infinite reverse;
+      opacity: 0.3;
+      height: 120px;
+      bottom: -15px;
+    }
+
+    @keyframes waveAnimation {
+      0% { transform: translateX(0) }
+      100% { transform: translateX(-1440px) }
+    }
+
+    /* Glassmorphism Card Effect */
+    .glass-box {
+      background: var(--card-bg);
+      padding: 30px;
+      border-radius: 25px;
+      margin: 20px auto;
+      max-width: 90%;
+      box-shadow: 0 0 50px rgba(93, 63, 211, 0.7), inset 0 0 20px rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      animation: fadeIn 0.8s ease-out forwards;
+      position: relative;
+    }
+
+    .glass-box.admin-panel {
+      max-width: 1200px;
+      padding: 40px;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Headings & Text */
+    h1, h2, h3, p {
+      color: var(--primary-color);
+      text-shadow: 0 0 15px var(--primary-color);
+      margin: 10px 0;
+      font-weight: 700;
+    }
+    
+    .logo-Anaspel {
+      font-family: var(--font-title);
+      font-size: 3rem;
+      text-shadow: 0 0 20px var(--secondary-color);
+      letter-spacing: 4px;
+    }
+    
+    .logo-Anaspel i {
+      animation: neon-glow 2s infinite alternate;
+    }
+    
+    @keyframes neon-glow {
+      0% { text-shadow: 0 0 10px var(--secondary-color), 0 0 20px var(--secondary-color); }
+      100% { text-shadow: 0 0 30px var(--secondary-color), 0 0 40px var(--secondary-color); }
+    }
+
+    /* Form Inputs */
+    .input-group {
+      margin-bottom: 25px;
+    }
+    
+    input[type="text"], 
+    input[type="password"],
+    input[type="date"],
+    select {
+      display: block;
+      margin: 15px auto;
+      padding: 20px 25px;
+      font-size: 1.1rem;
+      width: 100%;
+      max-width: 450px;
+      border-radius: 15px;
+      border: 2px solid var(--primary-color);
+      background-color: transparent;
+      color: var(--secondary-color);
+      text-align: center;
+      outline: none;
+      box-shadow: 0 0 10px rgba(93, 63, 211, 0.5);
+    }
+    
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+    }
+
+    input:focus, select:focus {
+      border-color: var(--secondary-color);
+      box-shadow: 0 0 25px var(--secondary-color), 0 0 15px var(--secondary-color) inset;
+    }
+
+    input::placeholder {
+      color: var(--secondary-color);
+      opacity: 0.7;
+    }
+    
+    /* Buttons */
+    button {
+      background: linear-gradient(135deg, var(--secondary-color), #27ae60);
+      color: #0c0c1e;
+      width: 100%;
+      padding: 20px;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      border: none;
+      box-shadow: 0 0 30px var(--secondary-color), 0 8px 20px rgba(59, 204, 155, 0.6);
+      font-weight: bold;
+      text-transform: uppercase;
+      transform-style: preserve-3d;
+    }
+
+    button:hover {
+      transform: translateY(-8px) scale(1.05);
+      box-shadow: 0 0 40px var(--secondary-color), 0 10px 30px rgba(59, 204, 155, 0.8);
+    }
+
+    button:disabled {
+      background: #333;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+    
+    .logout-btn {
+      margin-top: 25px;
+      background: none;
+      border: 2px solid var(--red);
+      color: var(--red);
+      box-shadow: none;
+      width: auto;
+      padding: 15px 25px;
+      font-size: 1rem;
+      text-transform: none;
+    }
+
+    .logout-btn:hover {
+      background: var(--red);
+      color: white;
+      transform: none;
+    }
+
+    /* Admin Dashboard Specific */
+    .user-management-panel {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 50px;
+    }
+
+    @media (min-width: 768px) {
+      .user-management-panel {
+        grid-template-columns: 1fr 2fr;
+      }
+    }
+
+    .user-table-container {
+      overflow-x: auto;
+      margin-top: 25px;
+    }
+    
+    .user-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(59, 204, 155, 0.2);
+    }
+    
+    .user-table th, .user-table td {
+      padding: 20px;
+      border-bottom: 1px solid var(--card-border);
+      text-align: left;
+    }
+    
+    .user-table th {
+      background-color: var(--primary-color);
+      color: #0c0c1e;
+      text-shadow: none;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    
+    .user-table tbody tr:hover {
+      background-color: var(--card-bg);
+      transform: scale(1.01);
+    }
+
+    .status-badge {
+      padding: 8px 15px;
+      border-radius: 50px;
+      font-size: 0.9rem;
+      color: black;
+      font-weight: bold;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+    
+    .active-badge { background-color: var(--secondary-color); }
+    .expired-badge { background-color: var(--red); }
+    
+    /* User Dashboard Specific */
+    .user-profile-info {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 30px;
+        padding: 25px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .session-status {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+
+    .bug-options {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 25px;
+      margin-top: 35px;
+    }
+
+    .bug-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 25px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      cursor: pointer;
+      width: 180px;
+      text-align: center;
+    }
+
+    .bug-card i {
+      font-size: 2rem;
+      color: var(--primary-color);
+    }
+    
+    .bug-card:hover {
+      transform: scale(1.08);
+      box-shadow: 0 0 25px var(--primary-color);
+    }
+
+    .bug-card.active {
+      border: 3px solid var(--secondary-color);
+      box-shadow: 0 0 30px var(--secondary-color), 0 0 20px var(--secondary-color) inset;
+      background: rgba(59, 204, 155, 0.15);
+      color: var(--secondary-color);
+      transform: translateY(-5px);
+    }
+    
+    /* Popup Notification */
+    .popup-notification {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: rgba(26, 26, 26, 0.9);
+      color: white;
+      padding: 20px 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
+      z-index: 1000;
+      opacity: 0;
+      transform: translateY(150px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .popup-notification.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .popup-notification.success { border-left: 6px solid var(--secondary-color); }
+    .popup-notification.error { border-left: 6px solid var(--red); }
+    .popup-notification i { margin-right: 12px; }
+
+    /* Utilities */
+    .hidden {
+      display: none;
+    }
+    .text-center { text-align: center; }
+    .text-success { color: var(--secondary-color); }
+    .text-danger { color: var(--red); }
+    
+    hr {
+      border: 1px solid var(--card-border);
+      margin: 35px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="wave"></div>
+  <div class="wave wave2"></div>
+
+  <div id="notification-popup" class="popup-notification">
+    <span id="notification-message"></span>
+  </div>
+
+  <div id="login-page" class="glass-box">
+    <h1 class="logo-Anaspel"><i class="fas fa-crown"></i> Anas</h1>
+    <h2 style="color:white; text-shadow:none;">Panel Login</h2>
+    <p style="color:var(--secondary-color); text-shadow:none; font-size:1.1rem;">TikTok: @gyzenisback_1</p>
+    <div class="input-group">
+      <input type="text" id="username" placeholder="Username" />
+    </div>
+    <div class="input-group">
+      <input type="password" id="password" placeholder="Password" />
+    </div>
+    <button onclick="handleLogin()"><i class="fas fa-sign-in-alt"></i> Login</button>
+  </div>
+
+  <div id="admin-dashboard" class="glass-box admin-panel hidden">
+    <h1 class="logo-Anaspel"><i class="fas fa-user-shield"></i> Admin Panel</h1>
+    <p>Selamat datang, <b id="admin-username-display"></b></p>
+    <hr>
+    
+    <div class="user-management-panel">
+      <div id="create-user-section">
+        <h3>Buat Akun Pengguna Baru</h3>
+        <div class="input-group">
+          <input type="text" id="new-username" placeholder="Username Pengguna" />
+        </div>
+        <div class="input-group">
+          <input type="password" id="new-password" placeholder="Password Pengguna" />
+        </div>
+        <div class="input-group">
+          <label for="expired-date" style="text-shadow: none;">Tanggal Kedaluwarsa:</label>
+          <input type="date" id="expired-date" />
+        </div>
+        <button onclick="createUser()"><i class="fas fa-user-plus"></i> Buat Akun</button>
+      </div>
+
+      <div id="user-list-section">
+        <h3>Daftar Akun Pengguna</h3>
+        <div class="user-table-container">
+          <table class="user-table">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Kedaluwarsa</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="user-table-body">
+              </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+  </div>
+
+  <div id="user-dashboard" class="glass-box hidden">
+    <h1 class="logo-Anaspel"><i class="fab fa-whatsapp"></i> Apocalypse</h1>
+    <hr>
+    <div class="user-profile-info">
+        <h2 id="welcome-user"></h2>
+        <p id="expired-info"></p>
+        <div id="session-status-container">
+            <span id="session-text"></span>
+        </div>
+    </div>
+
+    <div id="user-content" class="hidden">
+      <div class="input-group">
+        <input type="text" id="target-number" placeholder="Nomor WhatsApp (cth: 628xxxx)" />
+      </div>
+      <div class="bug-options">
+        <div class="bug-card active" data-bug="Crashtotalvis"><i class="fas fa-skull-crossbones"></i><span>FC Invisible</span></div>
+        <div class="bug-card" data-bug="Forclose"><i class="fas fa-bomb"></i><span>FC WA</span></div>
+        <div class="bug-card" data-bug="Delay"><i class="fas fa-clock"></i><span>Invis Delay</span></div>
+        <div class="bug-card" data-bug="Blank Chat"><i class="fas fa-eye-slash"></i><span>Blank WhatsApp</span></div>
+      </div>
+      <button id="sendBtn" onclick="sendBug()"><i class="fas fa-bug"></i> Kirim Bug</button>
+    </div>
+    <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
