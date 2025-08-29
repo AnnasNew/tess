@@ -1,7 +1,5 @@
 [build]
-  # Direktori ini berisi file HTML, CSS, dan JS
   publish = "."
 
 [functions]
-  # Direktori ini berisi Netlify Functions Anda
   directory = "netlify/functions"
