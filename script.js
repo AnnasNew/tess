@@ -2,16 +2,17 @@
 
 // --- 1. KONFIGURASI ---
 const ADMIN_CREDENTIALS = {
-  username: "1",
-  password: "1"
+  username: "1", // Ganti dengan username admin yang kuat
+  password: "1"  // Ganti dengan password admin yang kuat
 };
 
 // URL API GitHub Raw untuk simulasi QR Code dan status koneksi
 // Anda harus membuat file JSON di repositori GitHub Anda dan mengganti URL ini
 // Contoh isi file JSON: {"qr": "https://i.imgur.com/QeN2n6Q.png", "status": "scan_me"}
 const GITHUB_API_URL = "https://raw.githubusercontent.com/Annas/kepforannas7hs/main/api/status.json";
-// URL API BUG akan dihubungkan ke server.js lokal
-const BUG_API_URL = "/api/send-bug"; // Mengubah URL API ke endpoint lokal
+
+// URL untuk Netlify Function kita
+const BUG_API_URL = "/send-bug"; 
 
 const USERS_STORAGE_KEY = 'annasKeceUsers';
 const SESSION_STORAGE_KEY = 'annasKeceSession';
@@ -36,22 +37,21 @@ const DOM = {
   sessionIcon: document.getElementById('session-icon'),
   sessionText: document.getElementById('session-text'),
   connectWaBtn: document.getElementById('connect-wa-btn'),
+  notificationPopup: document.getElementById('notification-popup'),
+  notificationMessage: document.getElementById('notification-message'),
 };
 
-let selectedBug = "Crashtotalvis";
+let selectedBug = "Crashtotalvis"; // Bug default yang dipilih
 let isWhatsAppConnected = false;
 let sessionCheckInterval = null;
 
 const showNotification = (message, type = 'success') => {
-  const notification = document.getElementById('notification-popup');
-  const messageEl = document.getElementById('notification-message');
+  DOM.notificationPopup.classList.remove('success', 'error', 'show');
+  DOM.notificationPopup.classList.add(type);
+  DOM.notificationMessage.innerHTML = `<i class="fas fa-info-circle"></i> ${message}`;
   
-  notification.classList.remove('success', 'error', 'show');
-  notification.classList.add(type);
-  messageEl.innerHTML = `<i class="fas fa-info-circle"></i> ${message}`;
-  
-  setTimeout(() => notification.classList.add('show'), 50);
-  setTimeout(() => notification.classList.remove('show'), 4000);
+  setTimeout(() => DOM.notificationPopup.classList.add('show'), 50);
+  setTimeout(() => DOM.notificationPopup.classList.remove('show'), 4000);
 };
 
 const showPage = (pageName) => {
@@ -62,10 +62,11 @@ const showPage = (pageName) => {
   };
   Object.values(pages).forEach(page => page.classList.add('hidden'));
   pages[pageName].classList.remove('hidden');
+  // Trigger animasi fadeIn
   pages[pageName].style.animation = 'fadeIn 0.8s ease-out forwards';
 };
 
-// --- 3. LOGIN & SESSION MANAGEMENT ---
+// --- 3. MANAJEMEN LOGIN & SESI ---
 const handleLogin = () => {
   const username = DOM.usernameInput.value.trim();
   const password = DOM.passwordInput.value.trim();
@@ -75,6 +76,7 @@ const handleLogin = () => {
     return;
   }
   
+  // Login Admin
   if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
     sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ username, role: 'admin' }));
     showAdminDashboard();
@@ -82,6 +84,7 @@ const handleLogin = () => {
     return;
   }
   
+  // Login Pengguna
   const users = JSON.parse(localStorage.getItem(USERS_STORAGE_KEY)) || [];
   const user = users.find(u => u.username === username && u.password === password);
   
@@ -108,6 +111,7 @@ const logout = () => {
   showPage('login');
   showNotification("Anda telah logout.", 'success');
   
+  // Hentikan interval pemeriksaan sesi WhatsApp saat logout
   if (sessionCheckInterval) {
     clearInterval(sessionCheckInterval);
   }
@@ -126,7 +130,7 @@ const checkSession = () => {
   }
 };
 
-// --- 4. ADMIN DASHBOARD LOGIC ---
+// --- 4. LOGIKA DASBOR ADMIN ---
 const showAdminDashboard = () => {
   const user = JSON.parse(sessionStorage.getItem(SESSION_STORAGE_KEY));
   if (user && user.role === 'admin') {
@@ -140,7 +144,7 @@ const showAdminDashboard = () => {
 
 const renderUserTable = () => {
   const users = JSON.parse(localStorage.getItem(USERS_STORAGE_KEY)) || [];
-  DOM.userTableBody.innerHTML = '';
+  DOM.userTableBody.innerHTML = ''; // Kosongkan tabel sebelum merender ulang
   
   users.forEach((user, index) => {
     const row = DOM.userTableBody.insertRow();
@@ -187,25 +191,26 @@ const createUser = () => {
   
   showNotification(`Akun ${newUsername} berhasil dibuat!`, 'success');
   
+  // Bersihkan input setelah pembuatan akun
   DOM.newUserUsername.value = '';
   DOM.newUserPassword.value = '';
   DOM.expiredDateInput.value = '';
   
-  renderUserTable();
+  renderUserTable(); // Perbarui tabel pengguna
 };
 
 const deleteUser = (index) => {
   let users = JSON.parse(localStorage.getItem(USERS_STORAGE_KEY)) || [];
   const username = users[index].username;
   if (confirm(`Apakah Anda yakin ingin menghapus akun ${username}?`)) {
-    users.splice(index, 1);
-    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+    users.splice(index, 1); // Hapus pengguna dari array
+    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users)); // Simpan perubahan ke localStorage
     showNotification(`Akun ${username} telah dihapus.`, 'success');
-    renderUserTable();
+    renderUserTable(); // Perbarui tabel pengguna
   }
 };
 
-// --- 5. USER DASHBOARD LOGIC ---
+// --- 5. LOGIKA DASBOR PENGGUNA ---
 const showUserDashboard = () => {
   const user = JSON.parse(sessionStorage.getItem(SESSION_STORAGE_KEY));
   if (user && user.role === 'user') {
@@ -213,11 +218,12 @@ const showUserDashboard = () => {
     const today = new Date();
     const expiredDate = new Date(user.expired);
     
+    // Periksa apakah akun sudah kadaluarsa
     if (today > expiredDate) {
       DOM.expiredInfo.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Akun Anda telah kadaluarsa pada <b>${user.expired}</b>.`;
       DOM.expiredInfo.classList.remove('text-success');
       DOM.expiredInfo.classList.add('text-danger');
-      DOM.userContent.classList.add('hidden');
+      DOM.userContent.classList.add('hidden'); // Sembunyikan konten jika kadaluarsa
     } else {
       DOM.expiredInfo.innerHTML = `<i class="fas fa-check-circle"></i> Akun aktif hingga <b>${user.expired}</b>.`;
       DOM.expiredInfo.classList.remove('text-danger');
@@ -225,20 +231,23 @@ const showUserDashboard = () => {
     }
     showPage('user');
     
-    // Periksa status sesi WhatsApp setiap 5 detik
+    // Mulai memeriksa status sesi WhatsApp
     checkWhatsAppSession();
+    // Atur interval untuk memeriksa status setiap 5 detik
     sessionCheckInterval = setInterval(checkWhatsAppSession, 5000);
   } else {
-    logout();
+    logout(); // Jika tidak ada sesi pengguna yang valid, logout
   }
 };
 
 const setupBugSelection = () => {
   document.querySelectorAll(".bug-card").forEach(card => {
     card.addEventListener("click", () => {
+      // Hapus kelas 'active' dari semua kartu
       document.querySelectorAll(".bug-card").forEach(c => c.classList.remove("active"));
+      // Tambahkan kelas 'active' ke kartu yang diklik
       card.classList.add("active");
-      selectedBug = card.getAttribute("data-bug");
+      selectedBug = card.getAttribute("data-bug"); // Perbarui bug yang dipilih
     });
   });
 };
@@ -251,18 +260,20 @@ const sendBug = async () => {
 
   const input = DOM.targetNumberInput.value.trim();
   
+  // Validasi nomor WhatsApp
   if (!/^(\d+)(@s\.whatsapp\.net)?$/.test(input)) {
     showNotification("Masukkan nomor WA yang valid! (Contoh: 628xxxx)", 'error');
     return;
   }
 
+  // Format nomor target ke chatId WhatsApp
   const chatId = input.includes("@s.whatsapp.net") ? input : `${input}@s.whatsapp.net`;
   
   DOM.sendBtn.disabled = true;
   DOM.sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
 
   try {
-    // Menggunakan fetch ke server.js lokal
+    // Kirim permintaan ke Netlify Function
     const res = await fetch(BUG_API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -283,7 +294,7 @@ const sendBug = async () => {
   }
 };
 
-// --- 6. WHATSAPP SESSION WITH GITHUB RAW API ---
+// --- 6. WHATSAPP SESSION DENGAN GITHUB RAW API ---
 const checkWhatsAppSession = async () => {
   try {
     const response = await fetch(GITHUB_API_URL);
@@ -297,14 +308,14 @@ const checkWhatsAppSession = async () => {
       DOM.sessionIcon.className = 'fas fa-check-circle text-success';
       DOM.sessionText.textContent = 'Perangkat terhubung!';
       DOM.connectWaBtn.classList.add('hidden');
-      DOM.userContent.classList.remove('hidden');
+      DOM.userContent.classList.remove('hidden'); // Tampilkan konten pengguna
       DOM.sendBtn.disabled = false;
     } else if (data.status === 'scan_me') {
       isWhatsAppConnected = false;
       DOM.sessionIcon.className = 'fas fa-qrcode';
       DOM.sessionText.textContent = 'Pindai QR code untuk koneksi!';
-      DOM.connectWaBtn.classList.remove('hidden');
-      DOM.userContent.classList.add('hidden');
+      DOM.connectWaBtn.classList.remove('hidden'); // Tampilkan tombol koneksi
+      DOM.userContent.classList.add('hidden'); // Sembunyikan konten pengguna
       DOM.sendBtn.disabled = true;
     } else {
       isWhatsAppConnected = false;
@@ -339,7 +350,7 @@ const connectWhatsApp = async () => {
         alert('Pindai QR code ini di perangkat WhatsApp Anda:\n' + data.qr);
         showNotification('Memeriksa status koneksi...', 'success');
     } else {
-        showNotification('QR Code tidak tersedia. Coba lagi.', 'error');
+        showNotification('QR Code tidak tersedia. Pastikan Anda telah mengunggahnya ke GitHub API.', 'error');
     }
 
   } catch (err) {
@@ -350,10 +361,12 @@ const connectWhatsApp = async () => {
   }
 };
 
-// --- 7. INITIALIZATIONS ---
+// --- 7. INISIALISASI ---
 document.addEventListener('DOMContentLoaded', () => {
-  checkSession();
-  setupBugSelection();
+  checkSession();       // Periksa sesi saat halaman dimuat
+  setupBugSelection();  // Atur pemilihan kartu bug
+  
+  // Inisialisasi particles.js
   particlesJS.load('particles-js', 'https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.json', function() {
     console.log('particles.js loaded - callback');
   });

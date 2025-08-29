@@ -1,0 +1,10 @@
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+  command = "echo 'Netlify build complete!'" # Perintah build opsional
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  
