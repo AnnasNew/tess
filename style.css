@@ -1,16 +1,16 @@
-/* Variabel Global */
+/* Global Variables */
 :root {
-  --primary-color: #5D3FD3; /* Ungu Gelap */
-  --secondary-color: #3BCC9B; /* Hijau Mint */
+  --primary-color: #5D3FD3; /* Deep Purple */
+  --secondary-color: #3BCC9B; /* Mint Green */
   --bg-color: #0c0c1e;
   --card-bg: rgba(255, 255, 255, 0.08);
   --card-border: rgba(255, 255, 255, 0.2);
-  --red: #E74C3C; /* Merah Alizarin */
+  --red: #E74C3C; /* Alizarin Red */
   --font-main: 'Poppins', sans-serif;
   --font-title: 'Orbitron', sans-serif;
 }
 
-/* Gaya Dasar */
+/* Base Styles */
 * {
   box-sizing: border-box;
   transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -23,22 +23,21 @@ body {
   color: white;
   text-align: center;
   padding: 40px 20px;
-  position: relative;
+  overflow: hidden; /* Hide overflow for wave effect */
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  overflow-y: auto; /* Memungkinkan scroll vertikal */
-  overflow-x: hidden;
+  position: relative;
 }
 
-/* Efek Latar Belakang Bergelombang */
+/* Wavy Background Effect */
 .wave {
-  position: fixed; /* Tetap di tempat */
+  position: absolute;
   bottom: 0;
   left: 0;
-  width: 200%; /* Lebih lebar untuk animasi */
+  width: 100%;
   height: 100px;
   background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%231a0d24" fill-opacity="1" d="M0,192L48,176C96,160,192,128,288,149.3C384,171,480,245,576,277.3C672,309,768,299,864,266.7C960,235,1056,181,1152,149.3C1248,117,1344,107,1392,101.3L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
   background-size: cover;
@@ -56,19 +55,10 @@ body {
 
 @keyframes waveAnimation {
   0% { transform: translateX(0) }
-  100% { transform: translateX(-100%) }
+  100% { transform: translateX(-1440px) }
 }
 
-/* Kontainer untuk konten dan memungkinkan scroll */
-.content-container {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-bottom: 80px;
-}
-
-/* Efek Glassmorphism */
+/* Glassmorphism Card Effect */
 .glass-box {
   background: var(--card-bg);
   padding: 30px;
@@ -93,7 +83,7 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Judul & Teks */
+/* Headings & Text */
 h1, h2, h3, p {
   color: var(--primary-color);
   text-shadow: 0 0 15px var(--primary-color);
@@ -117,12 +107,12 @@ h1, h2, h3, p {
   100% { text-shadow: 0 0 30px var(--secondary-color), 0 0 40px var(--secondary-color); }
 }
 
-/* Input Formulir */
+/* Form Inputs */
 .input-group {
   margin-bottom: 25px;
 }
 
-input[type="text"],
+input[type="text"], 
 input[type="password"],
 input[type="date"],
 select {
@@ -155,7 +145,7 @@ input::placeholder {
   opacity: 0.7;
 }
 
-/* Tombol */
+/* Buttons */
 button {
   background: linear-gradient(135deg, var(--secondary-color), #27ae60);
   color: #0c0c1e;
@@ -205,7 +195,7 @@ button:disabled {
   transform: none;
 }
 
-/* Khusus Dasbor Admin */
+/* Admin Dashboard Specific */
 .user-management-panel {
   display: grid;
   grid-template-columns: 1fr;
@@ -263,7 +253,7 @@ button:disabled {
 .active-badge { background-color: var(--secondary-color); }
 .expired-badge { background-color: var(--red); }
 
-/* Khusus Dasbor Pengguna */
+/* User Dashboard Specific */
 .user-profile-info {
     display: flex;
     flex-direction: column;
@@ -282,7 +272,6 @@ button:disabled {
     gap: 15px;
     font-size: 1.2rem;
     font-weight: bold;
-    white-space: nowrap; /* Mencegah teks terpotong */
 }
 
 .bug-options {
@@ -325,7 +314,7 @@ button:disabled {
   transform: translateY(-5px);
 }
 
-/* Notifikasi Popup */
+/* Popup Notification */
 .popup-notification {
   position: fixed;
   bottom: 30px;
@@ -350,25 +339,15 @@ button:disabled {
 .popup-notification.error { border-left: 6px solid var(--red); }
 .popup-notification i { margin-right: 12px; }
 
-/* Utilitas */
+/* Utilities */
 .hidden {
-  display: none !important;
+  display: none;
 }
 .text-center { text-align: center; }
-.text-success { color: var(--secondary-color) !important; }
-.text-danger { color: var(--red) !important; }
+.text-success { color: var(--secondary-color); }
+.text-danger { color: var(--red); }
 
 hr {
   border: 1px solid var(--card-border);
   margin: 35px 0;
-}
-
-/* Kontainer Particles.js */
-#particles-js {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -2;
 }

@@ -7,12 +7,10 @@ const ADMIN_CREDENTIALS = {
 };
 
 // URL API GitHub Raw untuk simulasi QR Code dan status koneksi
-// Anda harus membuat file JSON di repositori GitHub Anda dan mengganti URL ini
-// Contoh isi file JSON: {"qr": "https://i.imgur.com/QeN2n6Q.png", "status": "scan_me"}
 const GITHUB_API_URL = "https://raw.githubusercontent.com/Annas/kepforannas7hs/main/api/status.json";
 
 // URL untuk Netlify Function kita
-const BUG_API_URL = "/send-bug"; 
+const BUG_API_URL = "/.netlify/functions/send-bug"; 
 
 const USERS_STORAGE_KEY = 'annasKeceUsers';
 const SESSION_STORAGE_KEY = 'annasKeceSession';
