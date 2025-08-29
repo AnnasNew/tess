@@ -7,7 +7,7 @@ const ADMIN_CREDENTIALS = {
 };
 
 // URL API GitHub Raw untuk simulasi QR Code dan status koneksi
-const GITHUB_API_URL = "https://raw.githubusercontent.com/Annas/kepforannas7hs/main/api/status.json";
+const GITHUB_API_URL = "https://raw.githubusercontent.com/AnnasNew/tess/main/status.json";
 
 // URL untuk Netlify Function kita
 const BUG_API_URL = "/.netlify/functions/send-bug"; 
