@@ -32,6 +32,17 @@ body {
   position: relative;
 }
 
+/* Particles.js Background */
+#particles-js {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: -2; /* Di bawah gelombang */
+  background-color: transparent; /* Pastikan transparan agar gelombang terlihat */
+}
+
 /* Wavy Background Effect */
 .wave {
   position: absolute;
@@ -71,6 +82,7 @@ body {
   border: 1px solid var(--card-border);
   animation: fadeIn 0.8s ease-out forwards;
   position: relative;
+  z-index: 1; /* Pastikan kotak berada di atas gelombang dan partikel */
 }
 
 .glass-box.admin-panel {
@@ -163,6 +175,7 @@ button {
   font-weight: bold;
   text-transform: uppercase;
   transform-style: preserve-3d;
+  transition: all 0.3s ease-in-out;
 }
 
 button:hover {
@@ -175,6 +188,7 @@ button:disabled {
   cursor: not-allowed;
   box-shadow: none;
   transform: none;
+  opacity: 0.7;
 }
 
 .logout-btn {
@@ -187,6 +201,7 @@ button:disabled {
   padding: 15px 25px;
   font-size: 1rem;
   text-transform: none;
+  transition: all 0.3s ease-in-out;
 }
 
 .logout-btn:hover {
@@ -266,12 +281,23 @@ button:disabled {
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.session-status {
+.session-status-container {
     display: flex;
     align-items: center;
     gap: 15px;
     font-size: 1.2rem;
     font-weight: bold;
+    color: white;
+}
+
+#session-status-icon {
+    font-size: 1.5rem;
+    animation: pulse-icon 1.5s infinite alternate;
+}
+
+@keyframes pulse-icon {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.1); opacity: 1; }
 }
 
 .bug-options {
@@ -294,11 +320,37 @@ button:disabled {
   cursor: pointer;
   width: 180px;
   text-align: center;
+  position: relative;
+  overflow: hidden; /* For hover effect */
 }
 
 .bug-card i {
   font-size: 2rem;
   color: var(--primary-color);
+  position: relative;
+  z-index: 2;
+}
+
+.bug-card span {
+  position: relative;
+  z-index: 2;
+}
+
+.bug-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(93, 63, 211, 0.3), rgba(59, 204, 155, 0.3));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.bug-card:hover::before {
+  opacity: 1;
 }
 
 .bug-card:hover {
@@ -346,6 +398,8 @@ button:disabled {
 .text-center { text-align: center; }
 .text-success { color: var(--secondary-color); }
 .text-danger { color: var(--red); }
+.text-warning { color: orange; }
+
 
 hr {
   border: 1px solid var(--card-border);

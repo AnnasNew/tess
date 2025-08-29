@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div id="particles-js"></div>
   <div class="wave"></div>
   <div class="wave wave2"></div>
 
@@ -46,7 +47,7 @@
           <input type="password" id="new-password" placeholder="Password Pengguna" />
         </div>
         <div class="input-group">
-          <label for="expired-date" style="text-shadow: none;">Tanggal Kedaluwarsa:</label>
+          <label for="expired-date" style="text-shadow: none; color: var(--secondary-color); text-align: left; display: block; margin-left: 5px;">Tanggal Kedaluwarsa:</label>
           <input type="date" id="expired-date" />
         </div>
         <button onclick="createUser()"><i class="fas fa-user-plus"></i> Buat Akun</button>
@@ -79,13 +80,14 @@
     <div class="user-profile-info">
         <h2 id="welcome-user"></h2>
         <p id="expired-info"></p>
-        <div id="session-status-container">
-            <span id="session-text"></span>
+        <div class="session-status-container">
+            <span id="session-status-text"></span>
+            <span id="session-status-icon"></span>
         </div>
+        <button id="connect-wa-btn" class="hidden" onclick="connectWhatsApp()"><i class="fas fa-qrcode"></i> Koneksikan WhatsApp</button>
     </div>
 
-    <div id="user-content" class="hidden">
-      <div class="input-group">
+    <div id="user-content"> <div class="input-group">
         <input type="text" id="target-number" placeholder="Nomor WhatsApp (cth: 628xxxx)" />
       </div>
       <div class="bug-options">

@@ -7,6 +7,7 @@ const ADMIN_CREDENTIALS = {
 };
 
 // URL API GitHub Raw untuk simulasi QR Code dan status koneksi
+// PASTIKAN URL INI BENAR DAN MENGEMBALIKAN JSON DENGAN 'status' (connected/scan_me/disconnected) DAN 'qr' (jika scan_me)
 const GITHUB_API_URL = "https://raw.githubusercontent.com/AnnasNew/tess/main/status.json";
 
 // URL untuk Netlify Function kita
@@ -31,9 +32,9 @@ const DOM = {
   sendBtn: document.getElementById('sendBtn'),
   welcomeUser: document.getElementById('welcome-user'),
   expiredInfo: document.getElementById('expired-info'),
-  userContent: document.getElementById('user-content'),
-  sessionIcon: document.getElementById('session-icon'),
-  sessionText: document.getElementById('session-text'),
+  userContent: document.getElementById('user-content'), // Ini adalah div yang berisi input nomor dan bug cards
+  sessionStatusText: document.getElementById('session-status-text'),
+  sessionStatusIcon: document.getElementById('session-status-icon'),
   connectWaBtn: document.getElementById('connect-wa-btn'),
   notificationPopup: document.getElementById('notification-popup'),
   notificationMessage: document.getElementById('notification-message'),
@@ -44,7 +45,7 @@ let isWhatsAppConnected = false;
 let sessionCheckInterval = null;
 
 const showNotification = (message, type = 'success') => {
-  DOM.notificationPopup.classList.remove('success', 'error', 'show');
+  DOM.notificationPopup.classList.remove('success', 'error', 'show', 'warning');
   DOM.notificationPopup.classList.add(type);
   DOM.notificationMessage.innerHTML = `<i class="fas fa-info-circle"></i> ${message}`;
   
@@ -222,10 +223,12 @@ const showUserDashboard = () => {
       DOM.expiredInfo.classList.remove('text-success');
       DOM.expiredInfo.classList.add('text-danger');
       DOM.userContent.classList.add('hidden'); // Sembunyikan konten jika kadaluarsa
+      showNotification("Akun Anda telah kadaluarsa. Silakan hubungi admin.", 'error');
     } else {
       DOM.expiredInfo.innerHTML = `<i class="fas fa-check-circle"></i> Akun aktif hingga <b>${user.expired}</b>.`;
       DOM.expiredInfo.classList.remove('text-danger');
       DOM.expiredInfo.classList.add('text-success');
+      DOM.userContent.classList.remove('hidden'); // Tampilkan konten pengguna jika akun aktif
     }
     showPage('user');
     
@@ -252,120 +255,8 @@ const setupBugSelection = () => {
 
 const sendBug = async () => {
   if (!isWhatsAppConnected) {
-    showNotification("Perangkat WhatsApp belum terhubung!", 'error');
+    showNotification("Perangkat WhatsApp belum terhubung! Silakan koneksikan terlebih dahulu.", 'error');
     return;
   }
 
-  const input = DOM.targetNumberInput.value.trim();
-  
-  // Validasi nomor WhatsApp
-  if (!/^(\d+)(@s\.whatsapp\.net)?$/.test(input)) {
-    showNotification("Masukkan nomor WA yang valid! (Contoh: 628xxxx)", 'error');
-    return;
-  }
-
-  // Format nomor target ke chatId WhatsApp
-  const chatId = input.includes("@s.whatsapp.net") ? input : `${input}@s.whatsapp.net`;
-  
-  DOM.sendBtn.disabled = true;
-  DOM.sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
-
-  try {
-    // Kirim permintaan ke Netlify Function
-    const res = await fetch(BUG_API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ target: chatId, bugType: selectedBug })
-    });
-    const json = await res.json();
-    
-    if (json.success) {
-      showNotification(`Bug berhasil dikirim ke ${input}!`, 'success');
-    } else {
-      showNotification(`Gagal mengirim bug: ${json.message || 'unknown error'}`, 'error');
-    }
-  } catch (err) {
-    showNotification(`Gagal terhubung ke server: ${err.message}`, 'error');
-  } finally {
-    DOM.sendBtn.disabled = false;
-    DOM.sendBtn.innerHTML = '<i class="fas fa-bug"></i> Kirim Bug';
-  }
-};
-
-// --- 6. WHATSAPP SESSION DENGAN GITHUB RAW API ---
-const checkWhatsAppSession = async () => {
-  try {
-    const response = await fetch(GITHUB_API_URL);
-    if (!response.ok) {
-        throw new Error(`Gagal mengambil status dari GitHub. Status: ${response.status}`);
-    }
-    const data = await response.json();
-    
-    if (data.status === 'connected') {
-      isWhatsAppConnected = true;
-      DOM.sessionIcon.className = 'fas fa-check-circle text-success';
-      DOM.sessionText.textContent = 'Perangkat terhubung!';
-      DOM.connectWaBtn.classList.add('hidden');
-      DOM.userContent.classList.remove('hidden'); // Tampilkan konten pengguna
-      DOM.sendBtn.disabled = false;
-    } else if (data.status === 'scan_me') {
-      isWhatsAppConnected = false;
-      DOM.sessionIcon.className = 'fas fa-qrcode';
-      DOM.sessionText.textContent = 'Pindai QR code untuk koneksi!';
-      DOM.connectWaBtn.classList.remove('hidden'); // Tampilkan tombol koneksi
-      DOM.userContent.classList.add('hidden'); // Sembunyikan konten pengguna
-      DOM.sendBtn.disabled = true;
-    } else {
-      isWhatsAppConnected = false;
-      DOM.sessionIcon.className = 'fas fa-times-circle text-danger';
-      DOM.sessionText.textContent = 'Koneksi terputus. Silakan coba lagi.';
-      DOM.connectWaBtn.classList.remove('hidden');
-      DOM.userContent.classList.add('hidden');
-      DOM.sendBtn.disabled = true;
-    }
-  } catch (err) {
-    isWhatsAppConnected = false;
-    DOM.sessionIcon.className = 'fas fa-exclamation-triangle text-danger';
-    DOM.sessionText.textContent = 'Gagal terhubung ke API GitHub.';
-    DOM.connectWaBtn.classList.add('hidden');
-    DOM.userContent.classList.add('hidden');
-    DOM.sendBtn.disabled = true;
-  }
-};
-
-const connectWhatsApp = async () => {
-  DOM.connectWaBtn.disabled = true;
-  DOM.connectWaBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memuat QR...';
-  
-  try {
-    const response = await fetch(GITHUB_API_URL);
-    if (!response.ok) {
-        throw new Error(`Gagal mengambil QR dari GitHub.`);
-    }
-    const data = await response.json();
-    
-    if (data.qr && data.status === 'scan_me') {
-        alert('Pindai QR code ini di perangkat WhatsApp Anda:\n' + data.qr);
-        showNotification('Memeriksa status koneksi...', 'success');
-    } else {
-        showNotification('QR Code tidak tersedia. Pastikan Anda telah mengunggahnya ke GitHub API.', 'error');
-    }
-
-  } catch (err) {
-    showNotification(`Gagal mengambil QR dari GitHub: ${err.message}`, 'error');
-  } finally {
-    DOM.connectWaBtn.disabled = false;
-    DOM.connectWaBtn.innerHTML = '<i class="fas fa-qrcode"></i> Koneksikan WhatsApp';
-  }
-};
-
-// --- 7. INISIALISASI ---
-document.addEventListener('DOMContentLoaded', () => {
-  checkSession();       // Periksa sesi saat halaman dimuat
-  setupBugSelection();  // Atur pemilihan kartu bug
-  
-  // Inisialisasi particles.js
-  particlesJS.load('particles-js', 'https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.json', function() {
-    console.log('particles.js loaded - callback');
-  });
-});
+  const input = DOM.targetNumberInput
