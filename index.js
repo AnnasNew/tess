@@ -11,7 +11,6 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="particles-js"></div>
   <div class="wave"></div>
   <div class="wave wave2"></div>
 
@@ -24,10 +23,10 @@
     <h2 style="color:white; text-shadow:none;">Panel Login</h2>
     <p style="color:var(--secondary-color); text-shadow:none; font-size:1.1rem;">TikTok: @gyzenisback_1</p>
     <div class="input-group">
-      <input type="text" id="username" placeholder="Username" autocomplete="username" />
+      <input type="text" id="username" placeholder="Username" />
     </div>
     <div class="input-group">
-      <input type="password" id="password" placeholder="Password" autocomplete="current-password" />
+      <input type="password" id="password" placeholder="Password" />
     </div>
     <button onclick="handleLogin()"><i class="fas fa-sign-in-alt"></i> Login</button>
   </div>
@@ -41,13 +40,13 @@
       <div id="create-user-section">
         <h3>Buat Akun Pengguna Baru</h3>
         <div class="input-group">
-          <input type="text" id="new-username" placeholder="Username Pengguna" autocomplete="off" />
+          <input type="text" id="new-username" placeholder="Username Pengguna" />
         </div>
         <div class="input-group">
-          <input type="password" id="new-password" placeholder="Password Pengguna" autocomplete="new-password" />
+          <input type="password" id="new-password" placeholder="Password Pengguna" />
         </div>
         <div class="input-group">
-          <label for="expired-date" style="text-shadow: none; display: block; margin-bottom: 5px; color: white;">Tanggal Kedaluwarsa:</label>
+          <label for="expired-date" style="text-shadow: none;">Tanggal Kedaluwarsa:</label>
           <input type="date" id="expired-date" />
         </div>
         <button onclick="createUser()"><i class="fas fa-user-plus"></i> Buat Akun</button>
@@ -75,17 +74,13 @@
   </div>
 
   <div id="user-dashboard" class="glass-box hidden">
-    <h1 class="logo-Anaspel"><i class="fab fa-whatsapp"></i> Annas</h1>
+    <h1 class="logo-Anaspel"><i class="fab fa-whatsapp"></i> Apocalypse</h1>
     <hr>
     <div class="user-profile-info">
         <h2 id="welcome-user"></h2>
         <p id="expired-info"></p>
-        <div id="session-status-container" class="session-status">
-            <span id="session-icon"></span>
+        <div id="session-status-container">
             <span id="session-text"></span>
-            <button id="connect-wa-btn" class="logout-btn hidden" onclick="connectWhatsApp()">
-                <i class="fas fa-qrcode"></i> Koneksikan WhatsApp
-            </button>
         </div>
     </div>
 
