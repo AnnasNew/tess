@@ -10,11 +10,11 @@ const ADMIN_CREDENTIALS = {
 // Anda harus membuat file JSON di repositori GitHub Anda dan mengganti URL ini
 // Contoh isi file JSON: {"qr": "https://i.imgur.com/QeN2n6Q.png", "status": "scan_me"}
 const GITHUB_API_URL = "https://raw.githubusercontent.com/Annas/kepforannas7hs/main/api/status.json";
-const BUG_API_URL = "https://cella-saja.mydigital-store.me/permen";
+// URL API BUG akan dihubungkan ke server.js lokal
+const BUG_API_URL = "/api/send-bug"; // Mengubah URL API ke endpoint lokal
 
 const USERS_STORAGE_KEY = 'annasKeceUsers';
 const SESSION_STORAGE_KEY = 'annasKeceSession';
-const WHATSAPP_SESSION_KEY = 'annasKeceWaSess';
 
 // --- 2. GLOBAL STATE & UTILITIES ---
 const DOM = {
@@ -222,7 +222,6 @@ const showUserDashboard = () => {
       DOM.expiredInfo.innerHTML = `<i class="fas fa-check-circle"></i> Akun aktif hingga <b>${user.expired}</b>.`;
       DOM.expiredInfo.classList.remove('text-danger');
       DOM.expiredInfo.classList.add('text-success');
-      DOM.userContent.classList.remove('hidden');
     }
     showPage('user');
     
@@ -263,16 +262,21 @@ const sendBug = async () => {
   DOM.sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
 
   try {
-    const res = await fetch(`${BUG_API_URL}?chatId=${encodeURIComponent(chatId)}&type=${selectedBug}`);
+    // Menggunakan fetch ke server.js lokal
+    const res = await fetch(BUG_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ target: chatId, bugType: selectedBug })
+    });
     const json = await res.json();
     
-    if (json.status === "success") {
+    if (json.success) {
       showNotification(`Bug berhasil dikirim ke ${input}!`, 'success');
     } else {
       showNotification(`Gagal mengirim bug: ${json.message || 'unknown error'}`, 'error');
     }
   } catch (err) {
-    showNotification(`Gagal terhubung ke API: ${err.message}`, 'error');
+    showNotification(`Gagal terhubung ke server: ${err.message}`, 'error');
   } finally {
     DOM.sendBtn.disabled = false;
     DOM.sendBtn.innerHTML = '<i class="fas fa-bug"></i> Kirim Bug';
@@ -291,7 +295,6 @@ const checkWhatsAppSession = async () => {
     if (data.status === 'connected') {
       isWhatsAppConnected = true;
       DOM.sessionIcon.className = 'fas fa-check-circle text-success';
-      DOM.sessionIcon.style.animation = 'none';
       DOM.sessionText.textContent = 'Perangkat terhubung!';
       DOM.connectWaBtn.classList.add('hidden');
       DOM.userContent.classList.remove('hidden');
@@ -299,7 +302,6 @@ const checkWhatsAppSession = async () => {
     } else if (data.status === 'scan_me') {
       isWhatsAppConnected = false;
       DOM.sessionIcon.className = 'fas fa-qrcode';
-      DOM.sessionIcon.style.animation = 'none';
       DOM.sessionText.textContent = 'Pindai QR code untuk koneksi!';
       DOM.connectWaBtn.classList.remove('hidden');
       DOM.userContent.classList.add('hidden');
@@ -307,7 +309,6 @@ const checkWhatsAppSession = async () => {
     } else {
       isWhatsAppConnected = false;
       DOM.sessionIcon.className = 'fas fa-times-circle text-danger';
-      DOM.sessionIcon.style.animation = 'none';
       DOM.sessionText.textContent = 'Koneksi terputus. Silakan coba lagi.';
       DOM.connectWaBtn.classList.remove('hidden');
       DOM.userContent.classList.add('hidden');
@@ -316,7 +317,6 @@ const checkWhatsAppSession = async () => {
   } catch (err) {
     isWhatsAppConnected = false;
     DOM.sessionIcon.className = 'fas fa-exclamation-triangle text-danger';
-    DOM.sessionIcon.style.animation = 'none';
     DOM.sessionText.textContent = 'Gagal terhubung ke API GitHub.';
     DOM.connectWaBtn.classList.add('hidden');
     DOM.userContent.classList.add('hidden');
@@ -328,7 +328,6 @@ const connectWhatsApp = async () => {
   DOM.connectWaBtn.disabled = true;
   DOM.connectWaBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memuat QR...';
   
-  // Mengambil QR code dari API GitHub Raw (jika ada)
   try {
     const response = await fetch(GITHUB_API_URL);
     if (!response.ok) {
@@ -339,7 +338,6 @@ const connectWhatsApp = async () => {
     if (data.qr && data.status === 'scan_me') {
         alert('Pindai QR code ini di perangkat WhatsApp Anda:\n' + data.qr);
         showNotification('Memeriksa status koneksi...', 'success');
-        // Setelah memindai, admin backend harus mengubah file JSON di GitHub
     } else {
         showNotification('QR Code tidak tersedia. Coba lagi.', 'error');
     }
@@ -355,4 +353,8 @@ const connectWhatsApp = async () => {
 // --- 7. INITIALIZATIONS ---
 document.addEventListener('DOMContentLoaded', () => {
   checkSession();
+  setupBugSelection();
+  particlesJS.load('particles-js', 'https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.json', function() {
+    console.log('particles.js loaded - callback');
+  });
 });

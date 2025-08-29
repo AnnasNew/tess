@@ -34,21 +34,22 @@
       color: white;
       text-align: center;
       padding: 40px 20px;
-      overflow: hidden; /* Hide overflow for wave effect */
+      position: relative;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      position: relative;
+      overflow-y: auto; /* Enable vertical scrolling */
+      overflow-x: hidden;
     }
     
     /* Wavy Background Effect */
     .wave {
-      position: absolute;
+      position: fixed; /* Fixed to prevent scrolling with content */
       bottom: 0;
       left: 0;
-      width: 100%;
+      width: 200%; /* Make wider to accommodate animation */
       height: 100px;
       background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%231a0d24" fill-opacity="1" d="M0,192L48,176C96,160,192,128,288,149.3C384,171,480,245,576,277.3C672,309,768,299,864,266.7C960,235,1056,181,1152,149.3C1248,117,1344,107,1392,101.3L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
       background-size: cover;
@@ -66,7 +67,16 @@
 
     @keyframes waveAnimation {
       0% { transform: translateX(0) }
-      100% { transform: translateX(-1440px) }
+      100% { transform: translateX(-100%) } /* Adjusted to work with 200% width */
+    }
+    
+    /* Container to hold content and allow it to scroll */
+    .content-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-bottom: 80px; /* Add padding to prevent content from hiding behind waves */
     }
 
     /* Glassmorphism Card Effect */
@@ -283,6 +293,7 @@
         gap: 15px;
         font-size: 1.2rem;
         font-weight: bold;
+        white-space: nowrap; /* Prevent text wrap */
     }
 
     .bug-options {
@@ -352,19 +363,30 @@
 
     /* Utilities */
     .hidden {
-      display: none;
+      display: none !important;
     }
     .text-center { text-align: center; }
-    .text-success { color: var(--secondary-color); }
-    .text-danger { color: var(--red); }
+    .text-success { color: var(--secondary-color) !important; }
+    .text-danger { color: var(--red) !important; }
     
     hr {
       border: 1px solid var(--card-border);
       margin: 35px 0;
     }
+
+    /* Particles.js Container */
+    #particles-js {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2;
+    }
   </style>
 </head>
 <body>
+  <div id="particles-js"></div>
   <div class="wave"></div>
   <div class="wave wave2"></div>
 
@@ -428,13 +450,17 @@
   </div>
 
   <div id="user-dashboard" class="glass-box hidden">
-    <h1 class="logo-Anaspel"><i class="fab fa-whatsapp"></i> Apocalypse</h1>
+    <h1 class="logo-Anaspel"><i class="fab fa-whatsapp"></i> Annas</h1>
     <hr>
     <div class="user-profile-info">
         <h2 id="welcome-user"></h2>
         <p id="expired-info"></p>
-        <div id="session-status-container">
+        <div id="session-status-container" class="session-status">
+            <span id="session-icon"></span>
             <span id="session-text"></span>
+            <button id="connect-wa-btn" class="logout-btn hidden" onclick="connectWhatsApp()">
+                <i class="fas fa-qrcode"></i> Koneksikan WhatsApp
+            </button>
         </div>
     </div>
 
