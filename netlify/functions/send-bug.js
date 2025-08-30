@@ -1,4 +1,5 @@
 // File: netlify/functions/send-bug.js
+// Ini adalah FUNGSI PLACEHOLDER. Anda harus menggantinya dengan logika nyata.
 
 const axios = require('axios');
 
@@ -9,58 +10,31 @@ exports.handler = async (event) => {
       body: JSON.stringify({ success: false, message: 'Method Not Allowed' }),
     };
   }
+  
+  const { target, bugType } = JSON.parse(event.body);
+
+  if (!target || !bugType) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ success: false, message: 'Missing required parameters: target or bugType' }),
+    };
+  }
 
   try {
-    const { target, bugType } = JSON.parse(event.body);
-
-    if (!target || !bugType) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ success: false, message: 'Missing required parameters: target or bugType' }),
-      };
-    }
-
-    // --- MULAI IMPLEMENTASI PENGIRIMAN BUG WHATSAPP DI SINI ---
-    // Kode di bawah ini adalah placeholder dan tidak berfungsi secara nyata.
-    // Anda harus menggantinya dengan implementasi API WhatsApp yang valid.
+    // --- TEMPATKAN LOGIKA BAILEYS UNTUK MENGIRIM BUG DI SINI ---
+    // Contoh: call API server Baileys Anda yang memiliki fungsi untuk send-bug
     
-    // Simulasi respons sukses dari API eksternal
-    console.log(`Simulasi pengiriman bug '${bugType}' ke ${target}`);
-    await new Promise(resolve => setTimeout(resolve, 1500)); // Simulasi delay API
-    
-    // Logika payload bug: (contoh)
-    let payload = {};
-    switch (bugType) {
-      case 'Crashtotalvis':
-        payload = { type: 'interactive_message', size: 'large' };
-        break;
-      case 'Forclose':
-        payload = { type: 'text', content: 'bug_payload_for_close' };
-        break;
-      case 'Delay':
-        payload = { type: 'text', content: 'bug_payload_delay' };
-        break;
-      case 'Blank Chat':
-        payload = { type: 'text', content: 'bug_payload_blank' };
-        break;
-      default:
-        return {
-          statusCode: 400,
-          body: JSON.stringify({ success: false, message: 'Invalid bugType specified.' }),
-        };
-    }
-
-    // Mengembalikan respons sukses simulasi
+    // Contoh respons placeholder:
     return {
       statusCode: 200,
       body: JSON.stringify({ success: true, message: `Bug '${bugType}' berhasil dikirim ke ${target}` }),
     };
 
   } catch (error) {
-    console.error('Error in send-bug Netlify function:', error);
+    console.error('Error in send-bug function:', error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ success: false, message: `Server error: ${error.message || 'Unknown error'}` }),
+      body: JSON.stringify({ success: false, message: "Failed to send bug" }),
     };
   }
 };
