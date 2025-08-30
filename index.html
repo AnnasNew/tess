@@ -3,18 +3,397 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Anas Panel | Premium</title>
+  <title>Anas Panel | Admin & Pengguna</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+<style>
+  /* Global Variables */
+:root {
+  --primary-color: #5D3FD3; /* Deep Purple */
+  --secondary-color: #3BCC9B; /* Mint Green */
+  --bg-color: #0c0c1e;
+  --card-bg: rgba(255, 255, 255, 0.08);
+  --card-border: rgba(255, 255, 255, 0.2);
+  --red: #E74C3C; /* Alizarin Red */
+  --font-main: 'Poppins', sans-serif;
+  --font-title: 'Orbitron', sans-serif;
+}
+
+/* Base Styles */
+* {
+  box-sizing: border-box;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-main);
+  background-color: var(--bg-color);
+  color: white;
+  text-align: center;
+  overflow: hidden;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 40px 20px;
+}
+
+/* Particles.js Background */
+#particles-js {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-color);
+  background-image: url('');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: 50% 50%;
+  z-index: -1;
+}
+
+/* Glassmorphism Card Effect */
+.glass-box {
+  background: var(--card-bg);
+  padding: 30px;
+  border-radius: 25px;
+  margin: 20px auto;
+  max-width: 90%;
+  width: 500px;
+  box-shadow: 0 0 50px rgba(93, 63, 211, 0.7), inset 0 0 20px rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--card-border);
+  animation: fadeIn 0.8s ease-out forwards;
+  position: relative;
+}
+
+.glass-box.admin-panel {
+  max-width: 1200px;
+  width: 95%;
+  padding: 40px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Headings & Text */
+h1, h2, h3, p {
+  color: white;
+  text-shadow: 0 0 15px var(--primary-color);
+  margin: 10px 0;
+  font-weight: 700;
+  word-wrap: break-word; /* Prevents text overflow */
+}
+
+.logo-Anaspel {
+  font-family: var(--font-title);
+  font-size: 3rem;
+  text-shadow: 0 0 20px var(--secondary-color);
+  letter-spacing: 4px;
+}
+
+.logo-Anaspel i {
+  animation: neon-glow 2s infinite alternate;
+}
+
+@keyframes neon-glow {
+  0% { text-shadow: 0 0 10px var(--secondary-color), 0 0 20px var(--secondary-color); }
+  100% { text-shadow: 0 0 30px var(--secondary-color), 0 0 40px var(--secondary-color); }
+}
+
+/* Form Inputs */
+.input-group {
+  margin-bottom: 25px;
+}
+
+input[type="text"], 
+input[type="password"],
+input[type="date"] {
+  display: block;
+  margin: 15px auto;
+  padding: 20px 25px;
+  font-size: 1.1rem;
+  width: 100%;
+  max-width: 450px;
+  border-radius: 15px;
+  border: 2px solid var(--primary-color);
+  background-color: transparent;
+  color: var(--secondary-color);
+  text-align: center;
+  outline: none;
+  box-shadow: 0 0 10px rgba(93, 63, 211, 0.5);
+  transition: all 0.3s ease;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+input:focus {
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 25px var(--secondary-color), 0 0 15px var(--secondary-color) inset;
+}
+
+input::placeholder {
+  color: var(--secondary-color);
+  opacity: 0.7;
+}
+
+/* Buttons */
+button {
+  background: linear-gradient(135deg, var(--secondary-color), #27ae60);
+  color: #0c0c1e;
+  width: 100%;
+  padding: 20px;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border: none;
+  box-shadow: 0 0 30px var(--secondary-color), 0 8px 20px rgba(59, 204, 155, 0.6);
+  font-weight: bold;
+  text-transform: uppercase;
+  transform-style: preserve-3d;
+  transition: all 0.3s ease-in-out;
+  word-wrap: break-word;
+}
+
+button:hover {
+  transform: translateY(-8px) scale(1.05);
+  box-shadow: 0 0 40px var(--secondary-color), 0 10px 30px rgba(59, 204, 155, 0.8);
+}
+
+button:disabled {
+  background: #333;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+  opacity: 0.7;
+}
+
+.logout-btn {
+  margin-top: 25px;
+  background: none;
+  border: 2px solid var(--red);
+  color: var(--red);
+  box-shadow: none;
+  width: auto;
+  padding: 15px 25px;
+  font-size: 1rem;
+  text-transform: none;
+}
+
+.logout-btn:hover {
+  background: var(--red);
+  color: white;
+  transform: none;
+}
+
+/* Bug options */
+.bug-options {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 25px;
+  margin-top: 35px;
+}
+
+.bug-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  cursor: pointer;
+  width: 180px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.bug-card i {
+  font-size: 2rem;
+  color: var(--primary-color);
+  position: relative;
+  z-index: 2;
+}
+
+.bug-card span {
+  position: relative;
+  z-index: 2;
+  word-wrap: break-word;
+}
+
+.bug-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(93, 63, 211, 0.3), rgba(59, 204, 155, 0.3));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.bug-card:hover::before {
+  opacity: 1;
+}
+
+.bug-card:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 25px var(--primary-color);
+}
+
+.bug-card.active {
+  border: 3px solid var(--secondary-color);
+  box-shadow: 0 0 30px var(--secondary-color), 0 0 20px var(--secondary-color) inset;
+  background: rgba(59, 204, 155, 0.15);
+  color: var(--secondary-color);
+  transform: translateY(-5px);
+}
+
+/* Admin Dashboard Specific */
+.user-management-panel {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 50px;
+}
+
+@media (min-width: 768px) {
+  .user-management-panel {
+    grid-template-columns: 1fr 2fr;
+  }
+}
+
+.user-table-container {
+  overflow-x: auto;
+  margin-top: 25px;
+}
+
+.user-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(59, 204, 155, 0.2);
+}
+
+.user-table th, .user-table td {
+  padding: 20px;
+  border-bottom: 1px solid var(--card-border);
+  text-align: left;
+}
+
+.user-table th {
+  background-color: var(--primary-color);
+  color: #0c0c1e;
+  text-shadow: none;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.user-table tbody tr:hover {
+  background-color: var(--card-bg);
+  transform: scale(1.01);
+}
+
+.status-badge {
+  padding: 8px 15px;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  color: black;
+  font-weight: bold;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.active-badge { background-color: var(--secondary-color); }
+.expired-badge { background-color: var(--red); }
+
+/* User Dashboard Specific */
+.user-profile-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 30px;
+    padding: 25px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.status-text {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.whatsapp-pairing-section {
+  padding: 25px;
+  border: 1px solid var(--card-border);
+  border-radius: 15px;
+  margin-top: 20px;
+}
+
+/* Popup Notification */
+.popup-notification {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: rgba(26, 26, 26, 0.9);
+  color: white;
+  padding: 20px 30px;
+  border-radius: 15px;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  opacity: 0;
+  transform: translateY(150px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  word-wrap: break-word;
+}
+
+.popup-notification.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.popup-notification.success { border-left: 6px solid var(--secondary-color); }
+.popup-notification.error { border-left: 6px solid var(--red); }
+.popup-notification.warning { border-left: 6px solid orange; }
+.popup-notification i { margin-right: 12px; }
+
+/* Utilities */
+.hidden { display: none; }
+.text-center { text-align: center; }
+.text-success { color: var(--secondary-color); }
+.text-danger { color: var(--red); }
+
+hr {
+  border: 1px solid var(--card-border);
+  margin: 35px 0;
+}
+
+</style>
 </head>
 <body>
   <div id="particles-js"></div>
-  <div class="wave"></div>
-  <div class="wave wave2"></div>
-
   <div id="notification-popup" class="popup-notification">
     <span id="notification-message"></span>
   </div>
@@ -22,7 +401,7 @@
   <div id="login-page" class="glass-box">
     <h1 class="logo-Anaspel"><i class="fas fa-crown"></i> Anas</h1>
     <h2 style="color:white; text-shadow:none;">Panel Login</h2>
-    <p style="color:var(--secondary-color); text-shadow:none; font-size:1.1rem;">Akses Penuh dan Eksklusif</p>
+    <p style="color:var(--secondary-color); text-shadow:none; font-size:1.1rem;">TikTok: @gyzenisback_1</p>
     <div class="input-group">
       <input type="text" id="username" placeholder="Username" />
     </div>
@@ -36,7 +415,27 @@
     <h1 class="logo-Anaspel"><i class="fas fa-user-shield"></i> Admin Panel</h1>
     <p>Selamat datang, <b id="admin-username-display"></b></p>
     <hr>
-    
+
+    <div class="whatsapp-pairing-section">
+      <h3>Pengaturan Perangkat WhatsApp</h3>
+      <div id="session-status-container">
+        <span id="session-text" class="status-text">Memeriksa status...</span>
+        <button id="pair-btn" class="hidden" onclick="showPairingForm()"><i class="fas fa-link"></i> Koneksi Perangkat</button>
+      </div>
+      <div id="pairing-section" class="hidden">
+        <p>Silakan masukkan nomor telepon Anda yang ingin dikoneksikan ke Baileys.</p>
+        <div class="input-group">
+          <input type="text" id="target-pairing-number" placeholder="Nomor WA (cth: 628xxxxxxxx)" />
+        </div>
+        <button id="send-otp-btn" onclick="sendOtp()"><i class="fas fa-paper-plane"></i> Kirim Kode OTP</button>
+        <div id="otp-input-group" class="input-group hidden">
+          <input type="text" id="otp-code" placeholder="Masukkan kode OTP" />
+        </div>
+        <button id="pair-code-btn" class="hidden" onclick="pairWithCode()"><i class="fas fa-link"></i> Pasangkan Perangkat</button>
+      </div>
+    </div>
+    <hr>
+
     <div class="user-management-panel">
       <div id="create-user-section">
         <h3>Buat Akun Pengguna Baru</h3>
@@ -47,7 +446,7 @@
           <input type="password" id="new-password" placeholder="Password Pengguna" />
         </div>
         <div class="input-group">
-          <label for="expired-date" style="text-shadow: none; color: var(--secondary-color); text-align: left; display: block; margin-left: 5px;">Tanggal Kedaluwarsa:</label>
+          <label for="expired-date" style="text-shadow: none;">Tanggal Kedaluwarsa:</label>
           <input type="date" id="expired-date" />
         </div>
         <button onclick="createUser()"><i class="fas fa-user-plus"></i> Buat Akun</button>
@@ -80,14 +479,12 @@
     <div class="user-profile-info">
         <h2 id="welcome-user"></h2>
         <p id="expired-info"></p>
-        <div class="session-status-container">
-            <span id="session-status-text"></span>
-            <span id="session-status-icon"></span>
+        <div id="session-status-container">
+            <span id="session-text" class="status-text">Koneksi perangkat belum terhubung...</span>
         </div>
-        <button id="connect-wa-btn" class="hidden" onclick="connectWhatsApp()"><i class="fas fa-qrcode"></i> Koneksikan WhatsApp</button>
     </div>
 
-    <div id="user-content"> 
+    <div id="user-content" class="hidden">
       <div class="input-group">
         <input type="text" id="target-number" placeholder="Nomor WhatsApp (cth: 628xxxx)" />
       </div>

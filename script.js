@@ -6,12 +6,13 @@ const ADMIN_CREDENTIALS = {
   password: "1"  // Ganti dengan password admin yang kuat
 };
 
-// URL API GitHub Raw untuk simulasi QR Code dan status koneksi
-// Ganti dengan URL file status.json di repositori GitHub Anda
-const GITHUB_API_URL = "https://raw.githubusercontent.com/Annas/kepforannas7hs/main/api/status.json"; 
-
-// URL untuk Netlify Function kita
-const BUG_API_URL = "/.netlify/functions/send-bug"; 
+// URL Netlify Functions untuk berkomunikasi dengan server Baileys Anda
+const API_URL = {
+  status: "/.netlify/functions/get-status",
+  sendOtp: "/.netlify/functions/send-otp",
+  pairCode: "/.netlify/functions/pair-code",
+  sendBug: "/.netlify/functions/send-bug"
+};
 
 const USERS_STORAGE_KEY = 'annasKeceUsers';
 const SESSION_STORAGE_KEY = 'annasKeceSession';
@@ -33,9 +34,14 @@ const DOM = {
   welcomeUser: document.getElementById('welcome-user'),
   expiredInfo: document.getElementById('expired-info'),
   userContent: document.getElementById('user-content'),
-  sessionStatusText: document.getElementById('session-status-text'),
-  sessionStatusIcon: document.getElementById('session-status-icon'),
-  connectWaBtn: document.getElementById('connect-wa-btn'),
+  sessionText: document.getElementById('session-text'),
+  pairBtn: document.getElementById('pair-btn'),
+  pairingSection: document.getElementById('pairing-section'),
+  targetPairingNumber: document.getElementById('target-pairing-number'),
+  sendOtpBtn: document.getElementById('send-otp-btn'),
+  otpInputGroup: document.getElementById('otp-input-group'),
+  otpCodeInput: document.getElementById('otp-code'),
+  pairCodeBtn: document.getElementById('pair-code-btn'),
   notificationPopup: document.getElementById('notification-popup'),
   notificationMessage: document.getElementById('notification-message'),
 };
@@ -134,6 +140,10 @@ const showAdminDashboard = () => {
     DOM.adminUsernameDisplay.innerText = user.username;
     renderUserTable();
     showPage('admin');
+    
+    // Periksa status koneksi WhatsApp untuk admin
+    checkWhatsAppSession();
+    sessionCheckInterval = setInterval(checkWhatsAppSession, 5000);
   } else {
     logout();
   }
@@ -219,7 +229,6 @@ const showUserDashboard = () => {
       DOM.expiredInfo.classList.remove('text-success');
       DOM.expiredInfo.classList.add('text-danger');
       DOM.userContent.classList.add('hidden');
-      showNotification("Akun Anda telah kadaluarsa. Silakan hubungi admin.", 'error');
     } else {
       DOM.expiredInfo.innerHTML = `<i class="fas fa-check-circle"></i> Akun aktif hingga <b>${user.expired}</b>.`;
       DOM.expiredInfo.classList.remove('text-danger');
@@ -227,8 +236,8 @@ const showUserDashboard = () => {
       DOM.userContent.classList.remove('hidden');
     }
     showPage('user');
-    
-    checkWhatsAppSession();
+    setupBugSelection();
+    checkWhatsAppSession(); // Check session status for user dashboard
     sessionCheckInterval = setInterval(checkWhatsAppSession, 5000);
   } else {
     logout();
@@ -247,27 +256,25 @@ const setupBugSelection = () => {
 
 const sendBug = async () => {
   if (!isWhatsAppConnected) {
-    showNotification("Perangkat WhatsApp belum terhubung! Silakan koneksikan terlebih dahulu.", 'error');
+    showNotification("Perangkat WhatsApp belum terhubung!", 'error');
     return;
   }
 
   const input = DOM.targetNumberInput.value.trim();
   
   if (!/^62\d{8,15}$/.test(input)) {
-    showNotification("Masukkan nomor WA yang valid! (Contoh: 6281234567890)", 'error');
+    showNotification("Masukkan nomor WA yang valid! (Contoh: 628xxxx)", 'error');
     return;
   }
 
-  const chatId = `${input}@s.whatsapp.net`;
-  
   DOM.sendBtn.disabled = true;
   DOM.sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
 
   try {
-    const res = await fetch(BUG_API_URL, {
+    const res = await fetch(API_URL.sendBug, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ target: chatId, bugType: selectedBug })
+      body: JSON.stringify({ target: input, bugType: selectedBug })
     });
     const json = await res.json();
     
@@ -284,71 +291,109 @@ const sendBug = async () => {
   }
 };
 
-// --- 6. WHATSAPP SESSION DENGAN GITHUB RAW API ---
+// --- 6. WHATSAPP SESSION & PAIRING ---
 const checkWhatsAppSession = async () => {
   try {
-    const response = await fetch(GITHUB_API_URL + "?timestamp=" + new Date().getTime());
-    if (!response.ok) {
-        throw new Error(`Gagal mengambil status dari GitHub. Status: ${response.status}`);
-    }
+    const response = await fetch(API_URL.status);
     const data = await response.json();
     
+    const currentUser = JSON.parse(sessionStorage.getItem(SESSION_STORAGE_KEY));
+
     if (data.status === 'connected') {
       isWhatsAppConnected = true;
-      DOM.sessionStatusIcon.className = 'fas fa-check-circle text-success';
-      DOM.sessionStatusText.textContent = 'Perangkat terhubung!';
-      DOM.connectWaBtn.classList.add('hidden');
-      DOM.sendBtn.disabled = false;
-    } else if (data.status === 'scan_me') {
-      isWhatsAppConnected = false;
-      DOM.sessionStatusIcon.className = 'fas fa-qrcode text-warning';
-      DOM.sessionStatusText.textContent = 'Pindai QR code untuk koneksi!';
-      DOM.connectWaBtn.classList.remove('hidden');
-      DOM.sendBtn.disabled = true;
-      showNotification('Pindai QR code di WhatsApp Anda untuk memulai!', 'warning');
+      DOM.sessionText.innerHTML = `<i class="fas fa-check-circle text-success"></i> Perangkat terhubung!`;
+      if (currentUser.role === 'admin') {
+        DOM.pairBtn.classList.add('hidden');
+        DOM.pairingSection.classList.add('hidden');
+      } else {
+        DOM.userContent.classList.remove('hidden');
+      }
     } else {
       isWhatsAppConnected = false;
-      DOM.sessionStatusIcon.className = 'fas fa-times-circle text-danger';
-      DOM.sessionStatusText.textContent = 'Koneksi terputus. Silakan coba lagi.';
-      DOM.connectWaBtn.classList.remove('hidden');
-      DOM.sendBtn.disabled = true;
+      DOM.sessionText.innerHTML = `<i class="fas fa-times-circle text-danger"></i> Perangkat terputus.`;
+      if (currentUser.role === 'admin') {
+        DOM.pairBtn.classList.remove('hidden');
+      }
+      DOM.userContent.classList.add('hidden');
     }
   } catch (err) {
-    console.error("Error fetching WhatsApp session status:", err);
     isWhatsAppConnected = false;
-    DOM.sessionStatusIcon.className = 'fas fa-exclamation-triangle text-danger';
-    DOM.sessionStatusText.textContent = 'Gagal terhubung ke API Status.';
-    DOM.connectWaBtn.classList.add('hidden');
-    DOM.sendBtn.disabled = true;
+    DOM.sessionText.innerHTML = `<i class="fas fa-exclamation-triangle text-danger"></i> Gagal terhubung ke API Status.`;
+    DOM.pairBtn.classList.remove('hidden');
+    DOM.userContent.classList.add('hidden');
   }
 };
 
-const connectWhatsApp = async () => {
-  DOM.connectWaBtn.disabled = true;
-  DOM.connectWaBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memuat QR...';
-  
-  try {
-    const response = await fetch(GITHUB_API_URL + "?timestamp=" + new Date().getTime());
-    if (!response.ok) {
-        throw new Error(`Gagal mengambil QR dari GitHub.`);
-    }
-    const data = await response.json();
-    
-    if (data.qr && data.status === 'scan_me') {
-        alert('Pindai QR code ini di perangkat WhatsApp Anda:\n' + data.qr);
-        showNotification('QR Code ditampilkan. Memeriksa status koneksi...', 'success');
-    } else if (data.status === 'connected') {
-        showNotification('Perangkat sudah terhubung!', 'success');
-    }
-    else {
-        showNotification('QR Code tidak tersedia atau status tidak `scan_me`.', 'error');
-    }
+const showPairingForm = () => {
+  DOM.pairingSection.classList.remove('hidden');
+  DOM.pairBtn.classList.add('hidden');
+};
 
+const sendOtp = async () => {
+  const number = DOM.targetPairingNumber.value.trim();
+  if (!/^62\d{8,15}$/.test(number)) {
+    showNotification("Nomor tidak valid. Gunakan format 62xxxx", 'error');
+    return;
+  }
+  
+  DOM.sendOtpBtn.disabled = true;
+  DOM.sendOtpBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim OTP...';
+
+  try {
+    const res = await fetch(API_URL.sendOtp, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ number })
+    });
+    const json = await res.json();
+    
+    if (json.success) {
+      showNotification("Kode OTP telah dikirim. Periksa WhatsApp di perangkat Anda!", 'success');
+      DOM.otpInputGroup.classList.remove('hidden');
+      DOM.pairCodeBtn.classList.remove('hidden');
+    } else {
+      showNotification(`Gagal mengirim OTP: ${json.message}`, 'error');
+    }
   } catch (err) {
-    showNotification(`Gagal mengambil QR dari GitHub: ${err.message}`, 'error');
+    showNotification(`Gagal terhubung ke API OTP: ${err.message}`, 'error');
   } finally {
-    DOM.connectWaBtn.disabled = false;
-    DOM.connectWaBtn.innerHTML = '<i class="fas fa-qrcode"></i> Koneksikan WhatsApp';
+    DOM.sendOtpBtn.disabled = false;
+    DOM.sendOtpBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Kode OTP';
+  }
+};
+
+const pairWithCode = async () => {
+  const number = DOM.targetPairingNumber.value.trim();
+  const code = DOM.otpCodeInput.value.trim();
+  
+  if (!code) {
+    showNotification("Kode OTP tidak boleh kosong!", 'error');
+    return;
+  }
+  
+  DOM.pairCodeBtn.disabled = true;
+  DOM.pairCodeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memasangkan...';
+
+  try {
+    const res = await fetch(API_URL.pairCode, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ number, code })
+    });
+    const json = await res.json();
+    
+    if (json.success) {
+      showNotification("Perangkat berhasil dipasangkan!", 'success');
+      DOM.pairingSection.classList.add('hidden');
+      checkWhatsAppSession();
+    } else {
+      showNotification(`Gagal memasangkan: ${json.message}`, 'error');
+    }
+  } catch (err) {
+    showNotification(`Gagal terhubung ke API Pairing: ${err.message}`, 'error');
+  } finally {
+    DOM.pairCodeBtn.disabled = false;
+    DOM.pairCodeBtn.innerHTML = '<i class="fas fa-link"></i> Pasangkan Perangkat';
   }
 };
 
